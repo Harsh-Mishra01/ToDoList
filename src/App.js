@@ -1,25 +1,37 @@
-import logo from './logo.svg';
-import './App.css';
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+import TodoList from './components/TodoList';
+import AddTodo from './components/AddTodo';
 
-function App() {
+const App = () => {
+  const [todos, setTodos] = useState([]);
+
+  useEffect(() => {
+    fetchTodos();
+  }, []);
+
+  const fetchTodos = async () => {
+    const response = await axios.get('http://localhost:5000/todos');
+    setTodos(response.data);
+  };
+
+  const addTodo = async text => {
+    const response = await axios.post('http://localhost:5000/todos', { text });
+    setTodos([...todos, response.data]);
+  };
+
+  const deleteTodo = async id => {
+    await axios.delete(`http://localhost:5000/todos/${id}`);
+    setTodos(todos.filter(todo => todo._id !== id));
+  };
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div>
+      <h1>Todo App</h1>
+      <AddTodo addTodo={addTodo} />
+      <TodoList todos={todos} deleteTodo={deleteTodo} />
     </div>
   );
-}
+};
 
 export default App;
